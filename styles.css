@@ -1,0 +1,145 @@
+/* Body Styles */
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Align items at the top */
+    height: 100vh; /* Full viewport height */
+    margin: 0; /* Remove default margin */
+    background-image: url('SNWD.png'); /* Add your background image */
+    background-size: cover; /* Ensure the image covers the entire background */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat;
+    padding-top: 100px; /* Space for the fixed navbar */
+}
+
+/* Header Styles */
+h1 {
+    text-align: center;
+    color: black; /* Text color */
+    margin: 20px 0; /* Margin for spacing */
+    padding: 10px; /* Padding inside the h1 element */
+    background-color: white; /* Light background */
+    border-radius: 8px; /* Rounded corners */
+    width: 50%;
+}
+
+/* Input and Button Styles */
+input[type="text"] {
+    padding: 10px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 250px; /* Set a width for the search input */
+}
+
+button {
+    padding: 10px 15px;
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+/* Hover Effect for Buttons */
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Button Styles */
+.button {
+    display: inline-block;
+    padding: 8px 12px; /* Padding for the buttons */
+    margin: 4px; /* Space between buttons */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners */
+    text-decoration: none; /* Remove underline from links */
+    color: white; /* Text color */
+    font-weight: bold; /* Bold text */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Transition effects */
+}
+
+/* Edit Button Style */
+.edit-button {
+    background-color: #007bff; /* Blue background */
+}
+
+.edit-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: scale(1.05); /* Slightly increase size on hover */
+}
+
+/* Delete Button Style */
+.delete-button {
+    background-color: #dc3545; /* Red background */
+}
+
+.delete-button:hover {
+    background-color: #c82333; /* Darker red on hover */
+    transform: scale(1.05); /* Slightly increase size on hover */
+}
+
+/* Back Button Specific Styles */
+.back-button {
+    background-color: #dc3545; /* Red background */
+}
+
+.back-button:hover {
+    background-color: #c82333; /* Darker red on hover */
+    transform: scale(1.05); /* Slightly increase size on hover */
+}
+
+/* Table Styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white; /* White background for the table */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow */
+}
+
+/* Table Header and Cell Styles */
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #007bff; /* Bootstrap primary color for header */
+    color: white; /* White text for the header */
+}
+
+/* Row Hover Effect */
+tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+}
+
+/* Make table scrollable */
+.table-container {
+    max-height: 400px; /* Set a max height for the table */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+    .search-container {
+        flex-direction: column; /* Stack elements on smaller screens */
+        align-items: flex-end; /* Align items to the end */
+    }
+
+    .search-container input[type="text"],
+    .search-container button {
+        width: 100%; /* Full width for inputs and buttons */
+        margin: 5px 0; /* Margin for spacing */
+    }
+}
+
+/* Paragraph Styling */
+p {
+    text-align: center;
+    font-weight: bold;
+}
