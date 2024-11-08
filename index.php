@@ -143,8 +143,6 @@ if (!isset($_SESSION['username'])) {
     <div class="tab-container">
         <a href="customers.php" class="tab_label">Customers</a>
         <a href="billing.php" class="tab_label">Billing</a>
-        <a href="payments.php" class="tab_label">Payments</a>
-        <a href="reports.php" class="tab_label">Reports</a>
     </div>
 </body>
 </html>

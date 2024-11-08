@@ -138,6 +138,9 @@ $message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
 $error = isset($_SESSION['error']) ? $_SESSION['error'] : '';
 unset($_SESSION['message']);
 unset($_SESSION['error']);
+
+require_once 'vendor/autoload.php'; // Include Composer autoload
+
 ?>
     <title>Billing Management</title>
     <link rel="stylesheet" href="styles.css">
@@ -292,6 +295,9 @@ unset($_SESSION['error']);
         <button class="button back-button" onclick="window.history.back();">Back</button>
     </div>
     
+    <!-- Add Billing Button -->
+    <button id="addBillingBtn" onclick="document.getElementById('addBillingModal').style.display='block'">Add Billing</button>
+    
     <!-- Billing Table -->
     <div class="table-container">
         <table>
@@ -303,8 +309,9 @@ unset($_SESSION['error']);
                     <th>Previous Reading</th>
                     <th>Current Reading</th>
                     <th>Initial Bill</th>
-                    <th>Total    Bill</th>
+                    <th>Total Bill</th>
                     <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -319,6 +326,12 @@ unset($_SESSION['error']);
                             <td><?php echo number_format($billing['initial_bill'], 2); ?></td>
                             <td><?php echo number_format($billing['total_bill'], 2); ?></td>
                             <td><?php echo $billing['payment_status']; ?></td>
+                            <td>
+                                <button onclick="openPrintWindow(<?php echo $billing['billing_id']; ?>)">Print</button>
+                                <a href="download_invoice.php?billing_id=<?php echo $billing['billing_id']; ?>" target="_blank">
+                                    <button>Download</button>
+                                </a>
+                            </td>
                         </tr>
                     <?php endwhile; ?>
                 <?php else: ?>
@@ -330,9 +343,6 @@ unset($_SESSION['error']);
         </table>
     </div>
 
-    <!-- Add Billing Button -->
-    <button id="addBillingBtn" onclick="document.getElementById('addBillingModal').style.display='block'">Add Billing</button>
-
     <!-- Add Billing Modal -->
     <div id="addBillingModal" class="modal">
         <div class="modal-content">
@@ -341,19 +351,22 @@ unset($_SESSION['error']);
             <form method="POST" action="">
                 <label for="concessionaire_name">Concessionaire Name:</label>
                 <input type="text" name="concessionaire_name" required>
-
-                <form method="POST" action="">
-                    <label for="billing_month">Billing Month:</label>
-                    <input type="month" id="billing_month" name="billing_month" required><br>
-                    <label for="past_current_reading">Past Current Reading:</label>
-                    <input type="number" name="past_current_reading" step="0.01" required>
-
-                    <label for="consumption">Consumption:</label>
-                    <input type="number" name="consumption" step="0.01" required>
-
+                <label for="billing_month">Billing Month:</label>
+                <input type="month" id="billing_month" name="billing_month" required>
+                <label for="past_current_reading">Past Current Reading:</label>
+                <input type="number" name="past_current_reading" step="0.01" required>
+                <label for="consumption">Consumption:</label>
+                <input type="number" name="consumption" step="0.01" required>
                     <button type="submit" name="add_billing">Add Billing</button>
             </form>
         </div>
     </div>
+    <script>
+    function openPrintWindow(billingId) {
+        const printWindow = window.open('generate_invoice.php?billing_id=' + billingId, '_blank');
+        printWindow.print();
+    }
+    </script>
+
 </body>
 </html>

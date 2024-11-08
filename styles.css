@@ -122,6 +122,7 @@ tr:hover {
 .table-container {
     max-height: 400px; /* Set a max height for the table */
     overflow-y: auto; /* Enable vertical scrolling */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Add shadow */
 }
 
 /* Responsive styles */
@@ -142,4 +143,31 @@ tr:hover {
 p {
     text-align: center;
     font-weight: bold;
+}
+
+/* Styles for action buttons */
+.action-button {
+    background-color: #4CAF50; /* Green background */
+    color: white; /* White text */
+    padding: 8px 12px; /* Padding for size */
+    margin: 0 5px; /* Space between buttons */
+    border: none; /* No borders */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 14px; /* Font size */
+    text-decoration: none; /* Remove underline for links */
+    display: inline-block; /* Display inline for alignment */
+}
+
+/* Different color for the Download button */
+.download-button {
+    background-color: #007BFF; /* Blue background */
+}
+
+.action-button:hover {
+    opacity: 0.9; /* Slight opacity change on hover */
+}
+
+.action-button:focus {
+    outline: none; /* Remove focus outline */
 }

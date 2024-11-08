@@ -89,26 +89,61 @@ unset($_SESSION['error']);
             cursor: pointer;
         }
         .modal {
-            display: none; /* Hidden by default */
-            position: fixed; 
-            z-index: 1; 
+            display: none;
+            position: fixed;
+            z-index: 1;
             left: 0;
             top: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgba(0,0,0,0.7); /* Darker background for the modal */
-            padding-top: 60px;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 150px;
         }
+
         .modal-content {
-            background-color: #ffffff; /* White background */
-            margin: 10% auto; /* Center the modal vertically */
+            background-color: #fefefe;
+            margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            border-radius: 8px; /* Rounded corners */
-            width: 85%; /* Width of modal */
-            max-width: 500px; /* Max width for larger screens */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow for depth */
+            width: 80%;
+            max-width: 500px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .modal-content form label {
+            display: block;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .modal-content input,
+        .modal-content select {
+            width: 80%;
+            margin: 10px auto;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+        }
+
+        .modal-content button {
+            width: 80%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            display: block;
+            margin: 10px auto;
+        }
+
+        .modal-content button:hover {
+            background-color: #45a049;
         }
         .close {
             color: #aaa; /* Close button color */
