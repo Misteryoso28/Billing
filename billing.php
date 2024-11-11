@@ -320,14 +320,14 @@ require_once 'vendor/autoload.php'; // Include Composer autoload
                         <tr>
                             <td><?php echo $billing['billing_id']; ?></td>
                             <td><?php echo $billing['concessionaire_name']; ?></td>
-                            <td><?php echo date("F Y", strtotime($billing['billing_month'])); ?></td>
+                            <td><?php echo date("m/d/Y", strtotime($billing['billing_month'])); ?></td>
                             <td><?php echo number_format($billing['previous_reading'], 2); ?></td>
                             <td><?php echo number_format($billing['current_reading'], 2); ?></td>
                             <td><?php echo number_format($billing['initial_bill'], 2); ?></td>
                             <td><?php echo number_format($billing['total_bill'], 2); ?></td>
                             <td><?php echo $billing['payment_status']; ?></td>
                             <td>
-                                <button onclick="openPrintWindow(<?php echo $billing['billing_id']; ?>)">Print</button>
+                            <button onclick="window.open('generate_invoice.php?billing_id=<?php echo $billing['billing_id']; ?>', '_blank')">Print</button>
                                 <a href="download_invoice.php?billing_id=<?php echo $billing['billing_id']; ?>" target="_blank">
                                     <button>Download</button>
                                 </a>

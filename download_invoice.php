@@ -1,49 +1,69 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';  // Ensure correct path
-
+session_start();
+require('fpdf/fpdf.php');
+require 'vendor/autoload.php';
 include 'db.php';
+
+use setasign\Fpdi\Fpdi;
 
 if (isset($_GET['billing_id'])) {
     $billing_id = intval($_GET['billing_id']);
-    $result = $conn->query("SELECT b.*, c.name AS concessionaire_name 
+    $stmt = $conn->prepare("SELECT b.*, c.name AS concessionaire_name, c.category AS category 
                             FROM billing b 
                             JOIN concessionaires c ON b.concessionaire_id = c.concessionaire_id 
-                            WHERE b.billing_id = $billing_id");
+                            WHERE b.billing_id = ?");
+    $stmt->bind_param("i", $billing_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         $billing = $result->fetch_assoc();
+
+        // Create an FPDI instance
+        $pdf = new Fpdi();
+
+        // Load the template PDF
+        $templateFile = 'receipt.pdf'; // Specify your template file path here
+        $pageCount = $pdf->setSourceFile($templateFile);
         
-        // Sanitize concessionaire name for filename
-        $concessionaire_name = preg_replace('/[^A-Za-z0-9_\-]/', '_', $billing['concessionaire_name']);
+        // Import the first page of the template
+        $templatePage = $pdf->importPage(1);
         
-        // Create TCPDF object
-        $pdf = new \TCPDF();
+        // Use the imported page as the background
         $pdf->AddPage();
-        $pdf->SetFont('helvetica', '', 12);
+        $pdf->useTemplate($templatePage, 0, 0, 210); // Adjust positioning and size as needed
 
-        // HTML content for the invoice
-        $html = "
-            <h1>Invoice for {$billing['concessionaire_name']}</h1>
-            <p>Billing Month: " . date("F Y", strtotime($billing['billing_month'])) . "</p>
-            <p>Previous Reading: " . number_format($billing['previous_reading'], 2) . "</p>
-            <p>Current Reading: " . number_format($billing['current_reading'], 2) . "</p>
-            <p>Consumption: " . number_format($billing['consumption'], 2) . "</p>
-            <p>Initial Bill: $" . number_format($billing['initial_bill'], 2) . "</p>
-            <p>Total Bill: $" . number_format($billing['total_bill'], 2) . "</p>
-            <p>Status: " . htmlspecialchars($billing['payment_status']) . "</p>";
+        // Set font and add overlay text
+        $pdf->SetFont('Arial', '', 10);
+        $pdf->SetTextColor(0, 0, 0);
 
-        // Write HTML to PDF
-        $pdf->writeHTML($html, true, false, true, false, '');
+        // Add the invoice data over the template
+        $pdf->SetXY(40, 15); // Adjust X, Y coordinates as per your template layout
+        $pdf->Cell(0, 10, $billing['concessionaire_name']);
 
-        // Set headers for the browser to handle the PDF download
-        header('Content-Type: application/pdf');
-        header('Content-Disposition: attachment; filename="' . $concessionaire_name . '_Invoice.pdf"');
-        header('Cache-Control: no-store, no-cache, must-revalidate');
-        header('Pragma: no-cache');
-        header('Expires: 0');
+        $pdf->SetXY(58, 46);
+        $pdf->Cell(0, 10, date("m/d/Y", strtotime($billing['billing_month'])));
 
-        // Output the PDF directly to the browser for download
-        $pdf->Output($concessionaire_name . '_Invoice.pdf', 'D'); // 'D' for download
+        $pdf->SetXY(85, 46);
+        $pdf->Cell(0, 10, number_format($billing['previous_reading'], 2));
+
+        $pdf->SetXY(105,46);
+        $pdf->Cell(0, 10, number_format($billing['current_reading'], 2));
+
+        $pdf->SetXY(128, 46);
+        $pdf->Cell(0, 10, number_format($billing['consumption'], 2));
+
+        $pdf->SetXY(20, 100);
+        $pdf->Cell(0, 10, 'Initial Bill: $' . number_format($billing['initial_bill'], 2));
+
+        $pdf->SetXY(20, 110);
+        $pdf->Cell(0, 10, 'Total Bill: $' . number_format($billing['total_bill'], 2));
+
+        $pdf->SetXY(20, 120);
+        $pdf->Cell(0, 10, 'Status: ' . htmlspecialchars($billing['payment_status']));
+
+        // Output the PDF to the browser or save it to a file
+        $pdf->Output('D', $billing['concessionaire_name'] . '_Invoice.pdf'); // Use $billing['concessionaire_name'] here
     } else {
         echo "No invoice found.";
     }
