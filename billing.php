@@ -73,47 +73,51 @@ function calculate_initial_bill($consumption, $category_rate) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_billing'])) {
     $concessionaire_name = mysqli_real_escape_string($conn, $_POST['concessionaire_name']);
-    $billing_month = mysqli_real_escape_string($conn, $_POST['billing_month']) . "-01"; // Ensure date format
-    $past_current_reading = mysqli_real_escape_string($conn, $_POST['past_current_reading']);
-$consumption = mysqli_real_escape_string($conn, $_POST['consumption']);
-    
-    // Fetch concessionaire info
-    $result = $conn->query("SELECT concessionaire_id, category, SC_discount FROM concessionaires WHERE name = '$concessionaire_name'");
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $concessionaire_id = $row['concessionaire_id'];
-        $category = $row['category'];
-        $sc_discount = $row['SC_discount'];
+    $billing_month = mysqli_real_escape_string($conn, $_POST['billing_month']) . "-01";
+    $previous_reading = mysqli_real_escape_string($conn, $_POST['previous_reading']);
+    $current_reading = mysqli_real_escape_string($conn, $_POST['current_reading']);
 
-        // Calculate readings and initial bill
-        $previous_reading = $past_current_reading;
-        $current_reading = $past_current_reading + $consumption;
-        $initial_bill = calculate_initial_bill($consumption, $category);
+    // Validate that the current reading is greater than the previous reading
+    if ($current_reading <= $previous_reading) {
+        $_SESSION['error'] = "Current reading must be greater than previous reading.";
+    } else {
+        // Calculate consumption and proceed with billing
+        $consumption = $current_reading - $previous_reading;
 
-        if ($sc_discount === 'yes') {
-            if ($consumption <= 30) {
+        // Fetch concessionaire info
+        $result = $conn->query("SELECT concessionaire_id, category, SC_discount FROM concessionaires WHERE name = '$concessionaire_name'");
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $concessionaire_id = $row['concessionaire_id'];
+            $category = $row['category'];
+            $sc_discount = $row['SC_discount'];
+
+            // Calculate the initial bill
+            $initial_bill = calculate_initial_bill($consumption, $category);
+
+            // Apply discount if eligible
+            if ($sc_discount === 'yes' && $consumption <= 30) {
                 $total_bill = $initial_bill * 0.95; // Apply 5% discount
             } else {
-                $total_bill = $initial_bill; // No discount applied
+                $total_bill = $initial_bill;
+            }
+
+            // Insert into billing table
+            $sql = "INSERT INTO billing 
+                    (concessionaire_id, billing_month, previous_reading, current_reading, consumption, initial_bill, total_bill, payment_status) 
+                    VALUES ('$concessionaire_id', '$billing_month', '$previous_reading', '$current_reading', '$consumption', '$initial_bill', '$total_bill', 'Pending')";
+
+            if ($conn->query($sql) === TRUE) {
+                $_SESSION['message'] = "Billing record added successfully.";
+            } else {
+                $_SESSION['error'] = "Error: " . $sql . "<br>" . $conn->error;
             }
         } else {
-            $total_bill = $initial_bill; // No discount applied
+            $_SESSION['error'] = "Error: Concessionaire not found.";
         }
-
-        // Insert into billing
-        $sql = "INSERT INTO billing 
-                (concessionaire_id, billing_month, previous_reading, current_reading, consumption, initial_bill, total_bill, payment_status) 
-                VALUES ('$concessionaire_id', '$billing_month', '$previous_reading', '$current_reading', '$consumption', '$initial_bill', '$total_bill', 'Pending')";
-
-        if ($conn->query($sql) === TRUE) {
-            $_SESSION['message'] = "Billing record added successfully.";
-        } else {
-            $_SESSION['error'] = "Error: " . $sql . "<br>" . $conn->error;
-        }
-    } else {
-        $_SESSION['error'] = "Error: Concessionaire not found.";
     }
 }
+
 
 $search_query = "";
 if (isset($_POST['search'])) {
@@ -353,11 +357,11 @@ require_once 'vendor/autoload.php'; // Include Composer autoload
                 <input type="text" name="concessionaire_name" required>
                 <label for="billing_month">Billing Month:</label>
                 <input type="month" id="billing_month" name="billing_month" required>
-                <label for="past_current_reading">Past Current Reading:</label>
-                <input type="number" name="past_current_reading" step="0.01" required>
-                <label for="consumption">Consumption:</label>
-                <input type="number" name="consumption" step="0.01" required>
-                    <button type="submit" name="add_billing">Add Billing</button>
+                <label for="previous_reading">Previous Reading:</label>
+                <input type="number" name="previous_reading" step="0.01" required>
+                <label for="current_reading">Current Reading:</label>
+                <input type="number" name="current_reading" step="0.01" required>
+                <button type="submit" name="add_billing">Add Billing</button>
             </form>
         </div>
     </div>

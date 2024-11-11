@@ -18,14 +18,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_customer'])) {
     $category = mysqli_real_escape_string($conn, $_POST['category']);
     $address = mysqli_real_escape_string($conn, $_POST['address']); // New address field
 
-    $sql = "INSERT INTO concessionaires (name, zone_id, account_number, category, address) VALUES ('$name', '$zone_id', '$account_number', '$category', '$address')"; // Include address
-    if ($conn->query($sql) === TRUE) {
-        $_SESSION['message'] = "Customer added successfully.";
-    } else {
-        $_SESSION['error'] = "Error: " . $sql . "<br>" . $conn->error;
-    }
+    $stmt = $conn->prepare("INSERT INTO concessionaires (name, zone_id, account_number, category, address) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("sisss", $name, $zone_id, $account_number, $category, $address);
+    $stmt->execute();
 }
-
 // Handle customer search
 $search_query = "";
 if (isset($_POST['search'])) {
