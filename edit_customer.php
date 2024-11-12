@@ -4,6 +4,7 @@ if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
 }
+include 'header.html';
 include 'db.php'; // Include your database connection script
 
 // Fetch customer details by ID

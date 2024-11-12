@@ -73,13 +73,23 @@ function calculate_initial_bill($consumption, $category_rate) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_billing'])) {
     $concessionaire_name = mysqli_real_escape_string($conn, $_POST['concessionaire_name']);
-    $billing_month = mysqli_real_escape_string($conn, $_POST['billing_month']) . "-01";
-    $previous_reading = mysqli_real_escape_string($conn, $_POST['previous_reading']);
+    $due_date = mysqli_real_escape_string($conn, $_POST['due_date']) . "-01";
     $current_reading = mysqli_real_escape_string($conn, $_POST['current_reading']);
+
+    // Fetch the latest reading for the concessionaire
+    $lastReadingResult = $conn->query("SELECT current_reading FROM billing WHERE concessionaire_id = (SELECT concessionaire_id FROM concessionaires WHERE name = '$concessionaire_name') ORDER BY billing_id DESC LIMIT 1");
+
+    if ($lastReadingResult->num_rows > 0) {
+        $lastReadingRow = $lastReadingResult->fetch_assoc();
+        $previous_reading = $lastReadingRow['current_reading'];
+    } else {
+        // Default previous reading to 0 if no previous billing records exist
+        $previous_reading = 0;
+    }
 
     // Validate that the current reading is greater than the previous reading
     if ($current_reading <= $previous_reading) {
-        $_SESSION['error'] = "Current reading must be greater than previous reading.";
+        $_SESSION['error'] = "Current reading must be greater than the previous reading.";
     } else {
         // Calculate consumption and proceed with billing
         $consumption = $current_reading - $previous_reading;
@@ -102,10 +112,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_billing'])) {
                 $total_bill = $initial_bill;
             }
 
+            // Get current date in YYYY-MM-DD format (use the correct format for the database)
+            $billing_date = date("Y-m-d");
+
             // Insert into billing table
             $sql = "INSERT INTO billing 
-                    (concessionaire_id, billing_month, previous_reading, current_reading, consumption, initial_bill, total_bill, payment_status) 
-                    VALUES ('$concessionaire_id', '$billing_month', '$previous_reading', '$current_reading', '$consumption', '$initial_bill', '$total_bill', 'Pending')";
+                    (concessionaire_id, due_date, previous_reading, current_reading, consumption, initial_bill, total_bill, payment_status, billing_date) 
+                    VALUES ('$concessionaire_id', '$due_date', '$previous_reading', '$current_reading', '$consumption', '$initial_bill', '$total_bill', 'Pending', '$billing_date')";
 
             if ($conn->query($sql) === TRUE) {
                 $_SESSION['message'] = "Billing record added successfully.";
@@ -119,6 +132,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_billing'])) {
 }
 
 
+
+
+
 $search_query = "";
 if (isset($_POST['search'])) {
     $search_query = mysqli_real_escape_string($conn, $_POST['search_query']);
@@ -130,12 +146,12 @@ if ($search_query) {
                               JOIN concessionaires c ON b.concessionaire_id = c.concessionaire_id 
                               WHERE c.name LIKE '%$search_query%' 
                               OR c.account_number LIKE '%$search_query%' 
-                              ORDER BY b.concessionaire_id ASC");
+                              ORDER BY b.billing_id DESC");
 } else {
     $billings = $conn->query("SELECT b.*, c.name AS concessionaire_name 
                               FROM billing b 
                               JOIN concessionaires c ON b.concessionaire_id = c.concessionaire_id 
-                              ORDER BY c.concessionaire_id ASC");
+                              ORDER BY b.billing_id DESC");
 }
 
 $message = isset($_SESSION['message']) ? $_SESSION['message'] : '';
@@ -309,7 +325,7 @@ require_once 'vendor/autoload.php'; // Include Composer autoload
                 <tr>
                     <th>Billing ID</th>
                     <th>Concessionaire</th>
-                    <th>Billing Month</th>
+                    <th>Due Date</th>
                     <th>Previous Reading</th>
                     <th>Current Reading</th>
                     <th>Initial Bill</th>
@@ -324,7 +340,7 @@ require_once 'vendor/autoload.php'; // Include Composer autoload
                         <tr>
                             <td><?php echo $billing['billing_id']; ?></td>
                             <td><?php echo $billing['concessionaire_name']; ?></td>
-                            <td><?php echo date("m/d/Y", strtotime($billing['billing_month'])); ?></td>
+                            <td><?php echo date("m/d/Y", strtotime($billing['due_date'])); ?></td>
                             <td><?php echo number_format($billing['previous_reading'], 2); ?></td>
                             <td><?php echo number_format($billing['current_reading'], 2); ?></td>
                             <td><?php echo number_format($billing['initial_bill'], 2); ?></td>
@@ -347,7 +363,7 @@ require_once 'vendor/autoload.php'; // Include Composer autoload
         </table>
     </div>
 
-    <!-- Add Billing Modal -->
+    <!-- Updated Add Billing Modal -->
     <div id="addBillingModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="document.getElementById('addBillingModal').style.display='none'">&times;</span>
@@ -355,16 +371,15 @@ require_once 'vendor/autoload.php'; // Include Composer autoload
             <form method="POST" action="">
                 <label for="concessionaire_name">Concessionaire Name:</label>
                 <input type="text" name="concessionaire_name" required>
-                <label for="billing_month">Billing Month:</label>
-                <input type="month" id="billing_month" name="billing_month" required>
-                <label for="previous_reading">Previous Reading:</label>
-                <input type="number" name="previous_reading" step="0.01" required>
+                <label for="due_date">Due Date: </label>
+                <input type="date" id="due_date" name="due_date" required>
                 <label for="current_reading">Current Reading:</label>
                 <input type="number" name="current_reading" step="0.01" required>
                 <button type="submit" name="add_billing">Add Billing</button>
             </form>
         </div>
     </div>
+
     <script>
     function openPrintWindow(billingId) {
         const printWindow = window.open('generate_invoice.php?billing_id=' + billingId, '_blank');

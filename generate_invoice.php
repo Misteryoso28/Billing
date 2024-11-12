@@ -17,9 +17,9 @@ if (isset($_GET['billing_id'])) {
 
     // Prepare the database query to fetch data from both billing and concessionaires tables
     $stmt = $conn->prepare("SELECT b.*, c.name AS concessionaire_name, c.category AS category, c.address, c.account_number 
-                            FROM billing b 
-                            JOIN concessionaires c ON b.concessionaire_id = c.concessionaire_id 
-                            WHERE b.billing_id = ?");
+                         FROM billing b 
+                         JOIN concessionaires c ON b.concessionaire_id = c.concessionaire_id 
+                         WHERE b.billing_id = ?");
     
     if (!$stmt) {
         echo "Database error: Unable to prepare the statement.";
@@ -42,7 +42,6 @@ if (isset($_GET['billing_id'])) {
             echo "Template file not found.";
             exit;
         }
-
         $pageCount = $pdf->setSourceFile($templateFile);
         
         // Import the first page of the template
@@ -61,14 +60,13 @@ if (isset($_GET['billing_id'])) {
         $pdf->Cell(0, 10, $billing['concessionaire_name']); // Concessionaire Name
 
         $pdf->SetXY(28, 22);
-        $pdf->Cell(0, 10, htmlspecialchars($billing['address'])); 
+        $pdf->Cell(0, 10, htmlspecialchars($billing['address'])); // Address
 
         $pdf->SetXY(33, 29.5);
-        $pdf->Cell(0, 10, $billing['account_number']);
+        $pdf->Cell(0, 10, $billing['account_number']); // Account Number from concessionaires table
 
-        // Date, previous reading, current reading, consumption
         $pdf->SetXY(58, 46);
-        $pdf->Cell(0, 10, date("m/d/Y", strtotime($billing['billing_month']))); // Billing Date
+        $pdf->Cell(0, 10, date("m/d/Y", strtotime($billing['billing_date']))); // Billing Date
 
         $pdf->SetXY(85, 46);
         $pdf->Cell(0, 10, number_format($billing['previous_reading'], 2)); // Previous Reading
@@ -77,15 +75,21 @@ if (isset($_GET['billing_id'])) {
         $pdf->Cell(0, 10, number_format($billing['current_reading'], 2)); // Current Reading
 
         $pdf->SetXY(128, 46);
-        $pdf->Cell(0, 10, number_format($billing['consumption'], 2)); 
+        $pdf->Cell(0, 10, number_format($billing['consumption'], 2)); // Consumption
+
+        $pdf->SetXY(164, 45);
+        $pdf->Cell(0, 10, date("m/d/Y", strtotime($billing['due_date']))); // Billing Date
 
         $pdf->SetXY(154, 54);
-        $pdf->Cell(0, 10, number_format($billing['initial_bill'], 2));
+        $pdf->Cell(0, 10, number_format($billing['initial_bill'], 2)); // Initial Bill
 
         $pdf->SetXY(154, 82);
-        $pdf->Cell(0, 10, number_format($billing['total_bill'], 2));
+        $pdf->Cell(0, 10, number_format($billing['total_bill'], 2)); // Total Bill
 
-        $pdf->SetXY(163 , 91);
+        $pdf->SetFont('Arial', 'B', 14); // Set font to bold and increase size
+        $pdf->SetTextColor(255, 0, 0); // Set text color to red
+
+        $pdf->SetXY(165, 91);
         $pdf->Cell(0, 10, $billing['billing_id']);
 
         $pdf->Output('I', 'invoice.pdf'); // 'I' for inline display; 'D' for download; 'F' for save to server
