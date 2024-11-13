@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 22, 2024 at 10:25 AM
+-- Generation Time: Nov 13, 2024 at 03:27 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -30,7 +30,8 @@ SET time_zone = "+00:00";
 CREATE TABLE `billing` (
   `billing_id` int(11) NOT NULL,
   `concessionaire_id` int(11) DEFAULT NULL,
-  `billing_month` date NOT NULL,
+  `due_date` date NOT NULL,
+  `billing_date` date NOT NULL,
   `previous_reading` decimal(10,2) NOT NULL,
   `current_reading` decimal(10,2) NOT NULL,
   `initial_bill` decimal(10,2) DEFAULT NULL,
@@ -39,6 +40,13 @@ CREATE TABLE `billing` (
   `senior_discount` decimal(10,2) DEFAULT NULL,
   `total_bill` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `billing`
+--
+
+INSERT INTO `billing` (`billing_id`, `concessionaire_id`, `due_date`, `billing_date`, `previous_reading`, `current_reading`, `initial_bill`, `payment_status`, `consumption`, `senior_discount`, `total_bill`) VALUES
+(1, 2, '2024-11-14', '2024-11-13', 0.00, 12.00, 301.00, 'Pending', 12.00, NULL, 301.00);
 
 -- --------------------------------------------------------
 
@@ -950,7 +958,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `billing`
 --
 ALTER TABLE `billing`
-  MODIFY `billing_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `billing_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `concessionaires`
